@@ -1,0 +1,166 @@
+﻿Sent: lunes, 27 de abril de 2020 9:31 a. m. ---------------------------------------------
+
+Aprendiendo nsight
+
+El algoritmo de GPU siempre genera los mismos, dada la misma seed?
+
+Las graficas muestran que en éste momento es mas o menos equivalente… Solo en CPU se demora más haciendo procesamiento, mientras que en GPU se demora pasando datos al a GPU
+
+Probar algoritmos de sorting: https://stackoverflow.com/questions/5288958/what-is-a-good-sorting-algorithm-on-cuda
+
+Revisar mejor Boost? Por lo menos para leer parámetros
+
+Volver el # de objetos un parámetro. Mostrar los primeros 100… 😉
+
+Revisar más https://docs.microsoft.com/en-us/cpp/build/vcpkg?view=vs-2019
+
+Sent: jueves, 30 de abril de 2020 9:09 a. m. -----------------------------------------------
+
+Hacer un web service para el acceso a la GPU. Podría ser con ésta lib:
+
+https://github.com/logandk/restful_mapper
+
+ó ésta de Microsoft:
+
+https://github.com/Microsoft/cpprestsdk
+
+ó con ésta:
+
+https://github.com/corvusoft/restbed
+
+
+Sent: jueves, 30 de abril de 2020 9:19 a. m. --------------------------------------------------
+
+De pronto programar el web service en Python, ó en una librería de más alto nivel?
+
+https://www.fullstackpython.com/flask.html
+
+Sent: miércoles, 6 de mayo de 2020 4:24 p. m. --------------------------------------------------
+
+Leyendo sobre RESTful
+
+https://docs.microsoft.com/en-us/azure/architecture/best-practices/api-design
+
+In 2008, Leonard Richardson proposed the following maturity model for web APIs:
+
+Level 0: Define one URI, and all operations are POST requests to this URI.
+Level 1: Create separate URIs for individual resources.
+Level 2: Use HTTP methods to define operations on resources.
+Level 3: Use hypermedia (HATEOAS, described below).
+
+/cpuSets/randomInts
+/gpuSets/randomInts
+POST: Create a new set of numbers (how many? MAX/MIN? duration (saved for a day by default)?)
+GET: Return the ids of all sets
+PUT: Not permitted
+DELETE: Not permited
+
+/sets/randomInts/<id>
+POST: Not permitted
+HEAD: metadata of the set, if it's big
+GET: Return the set with the given id, with metadata if paginated
+PUT: Not permitted
+DELETE: Not permitted
+
+/sets/randomInts/<id>/order
+POST: Not permitted
+GET: organizes the set, and returns the ordered set
+PUT: Not permitted
+DELETE: Not permitted
+
+
+https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/
+
+- /
+
+https://restfulapi.net/rest-api-design-tutorial-with-example/
+
+
+Un libro sobre Flask
+
+http://exploreflask.com/en/latest/
+
+
+Hacer una interfaz en línea con éstos comandos, antes de volverlo flask
+
+UN mega tutorial de Flask, se puede seguir para instalarlo:
+
+https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
+
+Binging for python:
+
+https://docs.python.org/2/extending/extending.html
+
+REST en C++:
+http://pistache.io/
+https://github.com/microsoft/cpprestsdk
+
+
+Sent: jueves, 7 de mayo de 2020 8:00 a. m. -----------------------------------------------------
+
+Éste es un proyecto que comenzó con mi interés de utilizar al máximo la tarjeta gráfica que tengo en mi computador personal, 
+lo cual me llevó a la siguiente lista de requerimientos, tanto en CPU como en GPU:
+- Crear grandes conjuntos de números aleatorios
+- Ordenar dichos conjuntos
+- Medir qué tanto se demoran dichas operaciones
+- Ver los resultados de alguna manera
+
+En general, traté de usar la mejor tecnología para cada problema que iba
+encontrando y combinarlo con mis gustos, lo cual me llevó a:
+- Usar CUDA para la programación en GPU
+- Usar C++, uno de mis gustos, para la estructura del programa en CUDA. La otra opción con CUDA para su máximo rendimiento es programar en C,
+pero no me pareció necesario. Esto me llevó a usar herencia y templates para estructurar
+una solución que permitiera pruebas tanto en CPU como en GPU
+- Aprender cómo hacer profile con NSight de NVidia dentro de Visual Studio, y también cómo usar el profiler en la línea de comandos
+- Reorganizar el código para preparar un servicio RESTFul, que permita usar el programa en CUDA como un servidor
+- Usar ??? para armar un servicio RESTful, basado en servicios que se ofrecen desde C++
+
+Sent: viernes, 8 de mayo de 2020 2:00 p. m. -----------------------------------------------------
+
+Agregué el comportamiento de ordenamiento al código, y creé dos funciones que permiten medir el número de nanosegundos que se gasta en
+cada operación. Hallazgos:
+- El tiempo que se demora es parecido, aunque se demora más en GPUs para conjuntos pequeños. 
+- La función de ordenamiento en GPU no es perfecta, y tiene bastantes errores para números cercanos a cero y para números muy grandes
+o muy pequeños.
+
+Agregué un menú interactivo para escoger entre CPU y GPU, y para dar el número de elementos Se rompe en los siguientes casos:
+- Con floats no funciona bien la aproximación en GPU, no ordena bien
+- El programa se rompe si no se crea al menos un conjunto y se sale
+
+Sent: domingo, 10 de mayo de 2020 7:00 p. m. -----------------------------------------------------
+
+
+  120  cat orders.txt | ./Ordering.exe | awk -f tiempos.awk
+  122  cat orders2.txt | ./Ordering.exe | awk -f tiempos.awk  > out.txt
+  126  mv out.txt out.csv
+
+   83  pico tiempos.awk
+   85  pico genOrders.awk
+   87  echo a | awk -f genOrders.awk
+   88  echo a | awk -f genOrders.awk > orders2.txt
+   
+   En out.xlsx está la gráfica... Interesante...
+
+Sent: lunes, 11 de mayo de 2020 10:49 a. m. -----------------------------------------------
+
+    ./Ordering.exe
+Escoja una opción:
+  1. Crear conjunto en CPU
+  2. Crear conjunto en GPU
+  10. Salir
+1
+exponente de 256?
+39062500
+Elapsed Time numElems 1410065408 creation: 72522142200.000000 nanoseconds, typeid: double
+Elapsed Time numElems 1410065408 order: 198345200500.000000 nanoseconds, typeid: double
+Escoja una opción:
+  1. Crear conjunto en CPU
+  2. Crear conjunto en GPU
+  10. Salir
+2
+exponente de 256?
+39062500
+Elapsed Time numElems 1410065408 creation: 1142118300.000000 nanoseconds, typeid: double
+calling int
+
+(Nunca retorna)... :(
